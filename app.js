@@ -4,9 +4,34 @@ const todoInput = document.querySelector("#todo-input");
 const todoList = document.querySelector("#todo-list");
 const emptyState = document.querySelector("#empty-state");
 const remainingCount = document.querySelector("#remaining-count");
+const themeToggle = document.querySelector("#theme-toggle");
+const filterButtons = document.querySelectorAll(".filter-button");
+const THEME_STORAGE_KEY = "todo-list-theme";
+const emptyStateMessages = {
+  all: "目前沒有待辦事項，先新增一件小事吧。",
+  active: "太棒了，目前沒有未完成的事項。",
+  completed: "還沒有已完成的事項。",
+};
 
 // 從瀏覽器儲存空間載入上一個工作階段的清單。
 let todos = loadTodos();
+let currentFilter = "all";
+
+function getInitialTheme() {
+  const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+  if (savedTheme === "light" || savedTheme === "dark") {
+    return savedTheme;
+  }
+
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function updateTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  const isDark = theme === "dark";
+  themeToggle.textContent = isDark ? "☀️ 淺色模式" : "🌙 深色模式";
+  themeToggle.setAttribute("aria-pressed", String(isDark));
+}
 
 function loadTodos() {
   try {
@@ -24,7 +49,13 @@ function saveTodos() {
 function renderTodos() {
   todoList.replaceChildren();
 
-  todos.forEach((todo) => {
+  const visibleTodos = todos.filter((todo) => {
+    if (currentFilter === "active") return !todo.completed;
+    if (currentFilter === "completed") return todo.completed;
+    return true;
+  });
+
+  visibleTodos.forEach((todo) => {
     const item = document.createElement("li");
     item.className = `todo-item${todo.completed ? " is-complete" : ""}`;
 
@@ -60,8 +91,9 @@ function renderTodos() {
   });
 
   const remaining = todos.filter((todo) => !todo.completed).length;
-  remainingCount.textContent = `剩餘：${remaining}`;
-  emptyState.hidden = todos.length > 0;
+  remainingCount.textContent = `未完成：${remaining} 項`;
+  emptyState.textContent = emptyStateMessages[currentFilter];
+  emptyState.hidden = visibleTodos.length > 0;
 }
 
 todoForm.addEventListener("submit", (event) => {
@@ -85,4 +117,23 @@ todoForm.addEventListener("submit", (event) => {
   todoInput.focus();
 });
 
+filterButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    currentFilter = button.dataset.filter;
+    filterButtons.forEach((filterButton) => {
+      const isActive = filterButton === button;
+      filterButton.classList.toggle("is-active", isActive);
+      filterButton.setAttribute("aria-pressed", String(isActive));
+    });
+    renderTodos();
+  });
+});
+
+themeToggle.addEventListener("click", () => {
+  const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+  updateTheme(nextTheme);
+});
+
+updateTheme(getInitialTheme());
 renderTodos();
