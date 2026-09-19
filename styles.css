@@ -303,6 +303,31 @@ h1 {
   font-weight: 700;
 }
 
+.footer-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.clear-completed-button {
+  padding: 7px 10px;
+  color: var(--danger);
+  background: transparent;
+  border: 1px solid var(--danger);
+  border-radius: 8px;
+  font-family: Arial, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  transition: color 160ms ease, background 160ms ease;
+}
+
+.clear-completed-button:hover,
+.clear-completed-button:focus-visible {
+  color: var(--surface);
+  background: var(--danger);
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -346,5 +371,11 @@ h1 {
   .app-footer {
     padding-right: 24px;
     padding-left: 24px;
+  }
+
+  .footer-content {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
   }
 }
