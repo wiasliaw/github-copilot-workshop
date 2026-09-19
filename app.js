@@ -10,7 +10,7 @@ const THEME_STORAGE_KEY = "todo-list-theme";
 const emptyStateMessages = {
   all: "目前沒有待辦事項，先新增一件小事吧。",
   active: "太棒了，目前沒有未完成的事項。",
-  completed: "還沒有已完成的事項。",
+  completed: "目前沒有已完成的事項；未完成的項目仍保留，只是被目前篩選條件隱藏。",
 };
 
 // 從瀏覽器儲存空間載入上一個工作階段的清單。
