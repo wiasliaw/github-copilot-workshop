@@ -8,6 +8,8 @@ const clearCompletedButton = document.querySelector("#clear-completed-button");
 const themeToggle = document.querySelector("#theme-toggle");
 const filterButtons = document.querySelectorAll(".filter-button");
 const THEME_STORAGE_KEY = "todo-list-theme";
+const FILTER_STORAGE_KEY = "todo-list-filter";
+const filterValues = ["all", "active", "completed"];
 const emptyStateMessages = {
   all: "目前沒有待辦事項，先新增一件小事吧。",
   active: "太棒了，目前沒有未完成的事項。",
@@ -16,7 +18,7 @@ const emptyStateMessages = {
 
 // 從瀏覽器儲存空間載入上一個工作階段的清單。
 let todos = loadTodos();
-let currentFilter = "all";
+let currentFilter = loadFilter();
 
 function getInitialTheme() {
   const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
@@ -43,12 +45,18 @@ function loadTodos() {
   }
 }
 
+function loadFilter() {
+  const savedFilter = localStorage.getItem(FILTER_STORAGE_KEY);
+  return filterValues.includes(savedFilter) ? savedFilter : "all";
+}
+
 function saveTodos() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
 }
 
 function renderTodos() {
   todoList.replaceChildren();
+  updateFilterButtons();
 
   const visibleTodos = todos.filter((todo) => {
     if (currentFilter === "active") return !todo.completed;
@@ -98,6 +106,14 @@ function renderTodos() {
   clearCompletedButton.hidden = !todos.some((todo) => todo.completed);
 }
 
+function updateFilterButtons() {
+  filterButtons.forEach((filterButton) => {
+    const isActive = filterButton.dataset.filter === currentFilter;
+    filterButton.classList.toggle("is-active", isActive);
+    filterButton.setAttribute("aria-pressed", String(isActive));
+  });
+}
+
 todoForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const text = todoInput.value.trim();
@@ -122,11 +138,7 @@ todoForm.addEventListener("submit", (event) => {
 filterButtons.forEach((button) => {
   button.addEventListener("click", () => {
     currentFilter = button.dataset.filter;
-    filterButtons.forEach((filterButton) => {
-      const isActive = filterButton === button;
-      filterButton.classList.toggle("is-active", isActive);
-      filterButton.setAttribute("aria-pressed", String(isActive));
-    });
+    localStorage.setItem(FILTER_STORAGE_KEY, currentFilter);
     renderTodos();
   });
 });
